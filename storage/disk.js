@@ -45,8 +45,21 @@ DiskStorage.prototype._handleFile = function _handleFile (req, file, cb) {
           filename: filename,
           path: finalPath,
           size: outStream.bytesWritten
-        })
-      })
+        });
+      });
+
+      req.once('aborted',function(){
+          file.stream.unpipe(outStream); 
+          var err=new Error('client aborted the request');
+          err.code='ABORTED';
+          cb(err, {
+              destination: destination,
+              filename: filename,
+              path: finalPath,
+              size: outStream.bytesWritten
+          }); 
+      });
+
     })
   })
 }
